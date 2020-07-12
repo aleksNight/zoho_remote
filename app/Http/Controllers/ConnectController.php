@@ -6,7 +6,6 @@ use App\Models\Connect;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 
@@ -55,7 +54,7 @@ class ConnectController extends Controller
 
     }
 
-    public function updateAction($url)
+    public function updateAction($controller, $id = null)
     {
         $client = new Client();
         $type = 'refresh_token';
@@ -68,9 +67,15 @@ class ConnectController extends Controller
 
         $jar = \GuzzleHttp\Cookie\CookieJar::fromArray($result, '/');
         $cookie = $jar->getCookieByName('access_token')->getValue();
-        Cookie::queue(Cookie::make('access_token', $cookie, 10));
+        Cookie::queue(Cookie::make('access_token', $cookie, 59));
 
-        return back();
+        if (!is_null($id)) {
+            return redirect()->action(
+                $controller, ['id' => $id]
+            );
+        } else {
+            return redirect()->action($controller)->with('status', 'Api token refreshed');
+        }
     }
 
     public function getAction ($uri)

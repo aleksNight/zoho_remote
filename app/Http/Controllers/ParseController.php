@@ -10,8 +10,6 @@ use App\Models\Field;
 use App\Models\FieldValue;
 use App\Models\Module;
 use App\Models\User;
-use GuzzleHttp\Client;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -22,13 +20,14 @@ class ParseController extends Controller
     //
     public function index ()
     {
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('ParseController@index');
         $active = Cookie::get('active');
         return(view('parsing', compact('active')));
     }
 
     public function allLookup ()
     {
-        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('parser');
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('ParseController@allLookup');
 
         $this->getUsers();
         $this->getModules();
@@ -39,7 +38,7 @@ class ParseController extends Controller
 
     public function allRecords ()
     {
-        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('parser');
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('ParseController@allRecords');
 
         $this->getDeals();
         $this->getActivities();
@@ -48,7 +47,7 @@ class ParseController extends Controller
 
     public function fields ()
     {
-        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('parser');
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('ParseController@fields');
 
         $this->getFields('Deals');
         $this->getFieldValues('Deals');

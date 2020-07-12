@@ -8,8 +8,6 @@ use App\Models\Contact;
 use App\Models\Deal;
 use App\Models\Field;
 use App\Models\User;
-use GuzzleHttp\Client;
-use GuzzleHttp\RequestOptions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 
@@ -88,8 +86,9 @@ class ActivityController extends Controller
             '$se_module' => (isset($record['exid'])) ? 'Deals' : null,
             'Who_Id' => $contact['exid'],
             'What_Id' => (isset($record['exid'])) ? $record['exid'] : null,
+            'Due_Date' => now()->addDay()->toDateString(),
         ];
-        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('activitiess/create');
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('ActivityController@store');
         $activityExid = app(ConnectController::class)->storeAction($out, 'Tasks', 'post');
 
         $activity = new Activity([
@@ -187,7 +186,7 @@ class ActivityController extends Controller
         ];
 
         $activity = Activity::find($id);
-        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('activitiess/edit');
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('ActivityController@update', $id);
         app(ConnectController::class)->storeAction($out, 'Tasks/' . $activity->exid, 'put');
 
         $activity->subject      = $request->get('subject');
@@ -214,7 +213,7 @@ class ActivityController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('ActivityController@destroy', $id);
         $active = null;
         $activity = Activity::find($id);
         app(ConnectController::class)->storeAction(null, 'Tasks/' . $activity->exid, 'put');

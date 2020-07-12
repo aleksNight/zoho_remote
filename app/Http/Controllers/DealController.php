@@ -74,7 +74,7 @@ class DealController extends Controller
         $revenew = $request->get('amount') / $request->get('probability');
 
         //guzzle
-        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('deals');
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('DealController@store');
         $out['data'][] = [
             'Owner' => [
                 'id' => $user['exid'],
@@ -93,7 +93,7 @@ class DealController extends Controller
             'Expected_Revenue' => $revenew,
             'Amount' => $request->get('amount'),
             'Probability' => $request->get('probability'),
-            'Created_Time' => date('Y-m-d'),
+            'Closing_Date' => now()->toDateString(),
         ];
         $dealExid = app(ConnectController::class)->storeAction($out, 'Deals', 'post');
 
@@ -203,7 +203,7 @@ class DealController extends Controller
             'Amount' => $request->get('amount'),
             'Probability' => $request->get('probability'),
         ];
-        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('deals/edit');
+        if (!isset($_COOKIE['access_token'])) return app(ConnectController::class)->updateAction('DealController@update', $id);
 
         $deal = Deal::find($id);
         app(ConnectController::class)->storeAction($out, 'Deals/' . $deal->exid, 'put');
@@ -237,7 +237,7 @@ class DealController extends Controller
     {
         //
         $deal = Deal::find($id);
-        app(ConnectController::class)->storeAction(null, 'Deals/' . $deal->exid, 'delete');
+        app(ConnectController::class)->storeAction(null, 'Deals/' . $deal->exid, 'DealController@destroy', $id);
         $deal->activity()->delete();
 
         return redirect('deals')->with('success', 'Deal deleted!');
